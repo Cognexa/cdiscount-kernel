@@ -53,7 +53,7 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
     def _configure_dataset(self, data_root: str='data',
                            split_file: str='split.csv',
                            valid_percent: float=0.1,
-                           batch_size: int=10,
+                           batch_size: int=64,
                            **kwargs):
         self._data_root = data_root
         self._split_file = split_file
