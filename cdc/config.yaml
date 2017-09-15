@@ -32,5 +32,5 @@ hooks:
   - SaveBest
   - CatchSigint
   - StopAfter:
-      epochs: 300
+      epochs: 10
   - cxflow_tensorflow.hooks.WriteTensorBoard
