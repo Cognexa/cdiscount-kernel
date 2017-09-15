@@ -1,18 +1,18 @@
 dataset:
   class: cdc.CDCNaiveDataset
   data_root: data
-  batch_size: 16
+  batch_size: 128
 
 model:
   name: CDCNaiveNet
   class: cdc.cdc_net.CDCNaiveNet
 
   # configure the architecture here
-  # all the entries are passed to as arguments to cdc.cdc_net.CDCNaiveNet._create_model
+  # all the entries are passed as arguments to cdc.cdc_net.CDCNaiveNet._create_model
 
   optimizer:
     class: AdamOptimizer
-    learning_rate: 0.0003
+    learning_rate: 0.0001
   session_config: {gpu_options: {allow_growth: true}}
 
   inputs: [images, labels]
@@ -20,6 +20,7 @@ model:
 
 main_loop:
   extra_streams: [valid]
+  skip_zeroth_epoch: True
 
 hooks:
   - ShowProgress
@@ -27,6 +28,7 @@ hooks:
       variables: [loss, accuracy]
   - LogVariables
   - LogProfile
+  - SaveEvery
   - SaveBest
   - CatchSigint
   - StopAfter:

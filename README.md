@@ -1,9 +1,21 @@
-# cdiscount-kernel
+# Open tensorflow kernel for Cdiscount’s Image Classification Challenge
 Open **cxflow-tensorflow** kernel for [**Cdiscount’s Image Classification Challenge**](https://www.kaggle.com/c/cdiscount-image-classification-challenge) Kaggle competition.
 
 Start training on multiple GPUs with **tensorflow** right away!
 
+Works on Linux with Python 3.5+.
+
+Features:
+- CLI data download
+- Data validation with SHA256 hash
+- Simple data visualization
+- Low memory footprint data streams
+- Base VGG-like convnet
+- Multi-GPU training with a single argument!
+
 ## Quick start
+Install tensorflow and 7z.
+
 Clone repo and install the requirements
 ```
 git clone https://github.com/Cognexa/cdiscount-kernel && cd cdiscount-kernel
@@ -13,8 +25,7 @@ pip3 install -r requirements.txt --user
 Download dataset with kaggle-cli (this may take a while, 3 hours in my case)
 ```
 # requires >57Gb of free space
-mkdir data && cd data
-kg download -u '<YOUR KAGGLE USERNAME>' -p '<YOUR KAGGLE PASSWORD>' -c 'cdiscount-image-classification-challenge'
+KG_USER="<YOUR KAGGLE USERNAME" KG_PASS="<YOUR KAGGLE PASSWORD>" cxflow dataset download cdc
 ```
 
 Validate your download and see the example data:
@@ -28,7 +39,7 @@ cxflow dataset show cdc
 Create a random validation split with 10% of the data and start training:
 ```
 cxflow dataset split cdc
-cxflow train cdc model.n_gpus=<NUMBER OF GPUS TO USE
+cxflow train cdc model.n_gpus=<NUMBER OF GPUS TO USE>
 ```
 
 ## About
