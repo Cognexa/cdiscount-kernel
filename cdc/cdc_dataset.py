@@ -133,21 +133,28 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
         Run with `cxflow dataset split cdc`
         :return:
         """
+        # read example headers
+        logging.info('Reading examples metadata, this may take a minute or two')
         ids = []
         categories = []
         for example in bson.decode_file_iter(open(path.join(self._data_root, self.TRAIN_FILE), 'rb')):
             ids.append(example['_id'])
             categories.append(example['category_id'])
+
+        # generate random split
         size = len(ids)
         train_size = int(size*(1-self._valid_percent))
         valid_size = (size-train_size)
         split = ['train']*train_size + ['valid']*valid_size
         random.shuffle(split)
+
+        # save split
         split_df = pd.DataFrame({'id': ids, 'split': split})
         split_path = path.join(self._data_root, self._split_file)
         split_df.to_csv(split_path, index=False)
         logging.info('Split train-valid of size %s-%s was written to `%s`', train_size, valid_size, split_path)
 
+        # save (category_id -> integer class) mapping
         categories = sorted(list(set(categories)))
         categories_df = pd.DataFrame({'category_id': categories, 'class': list(range(len(categories)))})
         categories_path = path.join(self._data_root, self.CATEGORIES_FILE)
