@@ -9,9 +9,11 @@ Features:
 - CLI data download
 - Data validation with SHA256 hash
 - Simple data visualization
+- Train-Valid splitting
 - Low memory footprint data streams
 - Base VGG-like convnet
 - Multi-GPU training with a single argument!
+- TensorBoard training tracking
 
 ## Quick start
 Install tensorflow and 7z.
