@@ -68,7 +68,7 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
 
         Use KG_USER and KG_PASS env. variables for log-in.
 
-        Run with `KG_USER=<YOUR KAGGLE USERNAME>,KG_PASS=<YOUR KAGGLE PASSWORD> cxflow dataset download cdc`
+        Run with `KG_USER="<YOUR KAGGLE USERNAME" KG_PASS="<YOUR KAGGLE PASSWORD>" cxflow dataset download cdc`
         """
         os.makedirs(self._data_root, exist_ok=True)
         os.chdir(self._data_root)
