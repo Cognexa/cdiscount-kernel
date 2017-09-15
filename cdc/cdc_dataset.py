@@ -122,8 +122,8 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
         data = bson.decode_file_iter(open(path.join(self._data_root, self.TRAIN_FILE), 'rb'))
         for i, example in takewhile(lambda x: x[0] < 10, enumerate(data)):
             for j, image in enumerate(example['imgs']):
-                skimage.io.imsave(path.join(self.VISUAL_DIR, 'image_{}_{}.jpg'.format(i, j)),
-                                  skimage.data.imread(io.BytesIO(image['picture'])))
+                with open(path.join(self.VISUAL_DIR, 'image_{}_{}.jpg'.format(i, j)), 'wb') as file_:
+                    file_.write(image['picture'])
         logging.info('Images saved to `%s`', self.VISUAL_DIR)
 
     def split(self):
