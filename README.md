@@ -42,6 +42,12 @@ cxflow dataset split cdc
 cxflow train cdc model.n_gpus=<NUMBER OF GPUS TO USE>
 ```
 
+Observe the training with TensorBoard (note: a summary is written only after each epoch)
+```
+tensorboard --logdir=log
+```
+
+
 ## About
 This kernel is written in [cxflow-tensorflow](https://github.com/Cognexa/cxflow-tensorflow), a plugin for [cxflow](https://github.com/Cognexa/cxflow) framework. Make sure you check it out!
 
