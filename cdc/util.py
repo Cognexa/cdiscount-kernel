@@ -1,4 +1,5 @@
 import hashlib
+from itertools import islice
 
 
 def sha256(filename: str):
@@ -14,7 +15,7 @@ def gen_batch(iterable, batch_size):
     """Transform example iteration to batch iteration with the given batch_size."""
     source = iter(iterable)
     while True:
-        chunk = [val for _, val in zip(range(batch_size), source) if val is not None]
+        chunk = list(islice(source, batch_size))
         if not chunk:
             raise StopIteration
         yield chunk
