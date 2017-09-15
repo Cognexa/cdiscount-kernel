@@ -1,0 +1,34 @@
+dataset:
+  class: cdc.CDCNaiveDataset
+  data_root: data
+  batch_size: 16
+
+model:
+  name: CDCNaiveNet
+  class: cdc.cdc_net.CDCNaiveNet
+
+  # configure the architecture here
+  # all the entries are passed to as arguments to cdc.cdc_net.CDCNaiveNet._create_model
+
+  optimizer:
+    class: AdamOptimizer
+    learning_rate: 0.0003
+  session_config: {gpu_options: {allow_growth: true}}
+
+  inputs: [images, labels]
+  outputs: [loss, accuracy]
+
+main_loop:
+  extra_streams: [valid]
+
+hooks:
+  - ShowProgress
+  - ComputeStats:
+      variables: [loss, accuracy]
+  - LogVariables
+  - LogProfile
+  - SaveBest
+  - CatchSigint
+  - StopAfter:
+      epochs: 300
+  - cxflow_tensorflow.hooks.WriteTensorBoard

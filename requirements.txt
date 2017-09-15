@@ -1,0 +1,9 @@
+pymongo
+numpy
+pandas
+tensorflow-gpu
+cxflow
+cxflow-tensorflow
+kaggle-cli
+scikit-image
+click
