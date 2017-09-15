@@ -10,6 +10,8 @@ import bson
 import skimage.data
 import skimage.io
 from itertools import takewhile
+from subprocess import call
+
 
 
 def gen_batch(iterable, size):
@@ -23,7 +25,7 @@ def gen_batch(iterable, size):
 
 class CDCNaiveDataset(cx.datasets.BaseDataset):
 
-    FILENAMES = ['category_names.7z', 'sample_submission.7z', 'train_example.bson']
+    FILENAMES = ['category_names.7z', 'sample_submission.7z', 'train_example.bson', 'test.bson', 'train.bson']
     TRAIN_FILE = 'train_example.bson'
     CATEGORIES_FILE = 'categories.csv'
     VISUAL_DIR = 'visual'
@@ -39,6 +41,21 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
         self._batch_size = batch_size
         self._split = None
         self._categories = None
+
+    def download(self):
+        """
+        Download and extract the data with kaggle-cli <https://github.com/floydwch/kaggle-cli>
+
+        Use KG_USER and KG_PASS env. variables for log-in.
+
+        Run with `KG_USER=<YOUR KAGGLE USERNAME>,KG_PASS=<YOUR KAGGLE PASSWORD> cxflow dataset download cdc`
+        """
+        os.makedirs(self._data_root, exist_ok=True)
+        os.chdir(self._data_root)
+        call(['kg', 'download',
+              '-u', os.getenv('KG_USER'),
+              '-p', os.getenv('KG_PASS'),
+              '-c', 'cdiscount-image-classification-challenge'])
 
     def validate(self):
         """
