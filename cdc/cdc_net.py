@@ -14,7 +14,7 @@ class CDCNaiveNet(cxtf.BaseModel):
 
     def _create_model(self):
         # inputs
-        images = tf.placeholder(tf.float32, shape=[None, 180, 180, 3], name='images')
+        images = tf.placeholder(tf.float32, shape=[None]+self._dataset.shape, name='images')
         labels = tf.placeholder(tf.int64, shape=[None], name='labels')
 
         # model
@@ -22,16 +22,17 @@ class CDCNaiveNet(cxtf.BaseModel):
                             activation_fn=tf.nn.relu,
                             weights_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                             reuse=tf.get_variable_scope().reuse):
-            net = slim.repeat(images, 2, slim.conv2d, 64, [3, 3], scope='conv1')
-            net = slim.max_pool2d(net, [3, 3], scope='pool1')
-            net = slim.repeat(net, 2, slim.conv2d, 128, [3, 3], scope='conv2')
-            net = slim.max_pool2d(net, [3, 3], scope='pool2')
-            net = slim.repeat(net, 3, slim.conv2d, 256, [3, 3], scope='conv3')
-            net = slim.max_pool2d(net, [3, 3], scope='pool3')
-            net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv4')
-            net = slim.max_pool2d(net, [2, 2], scope='pool4')
-            net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv5')
-            net = slim.max_pool2d(net, [2, 2], scope='pool5')
+            with slim.arg_scope([slim.conv2d], padding='same'):
+                net = slim.repeat(images, 2, slim.conv2d, 64, [3, 3], scope='conv1')
+                net = slim.max_pool2d(net, [2, 2], scope='pool1')
+                net = slim.repeat(net, 2, slim.conv2d, 128, [3, 3], scope='conv2')
+                net = slim.max_pool2d(net, [2, 2], scope='pool2')
+                net = slim.repeat(net, 3, slim.conv2d, 256, [3, 3], scope='conv3')
+                net = slim.max_pool2d(net, [2, 2], scope='pool3')
+                # net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv4')
+                # net = slim.max_pool2d(net, [2, 2], scope='pool4')
+                net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv5')
+                net = slim.max_pool2d(net, [2, 2], scope='pool5')
             net = slim.flatten(net)
             logging.info('Flatten shape `{}`'.format(net.shape))
             net = slim.fully_connected(net, 4096, scope='fc6')

@@ -1,4 +1,3 @@
-import io
 import os
 import logging
 import random
@@ -8,10 +7,8 @@ from itertools import takewhile
 import bson
 import cxflow as cx
 import pandas as pd
-import skimage.data
-import skimage.io
 
-from .util import gen_batch, sha256
+from .util import gen_batch, sha256, decode_image
 
 
 class CDCNaiveDataset(cx.datasets.BaseDataset):
@@ -40,6 +37,9 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
               '844d3e13fa785498c2b153bc0edc942d14bbc95b92f30c827487ef096fd28a53',
               '2b9ac4157e67fc96ab85ca99679b3b25cada589c4da6bb128fa006085b4cc42b']
     """SHA256 hashes of EXTRACTED files (see <https://www.kaggle.com/blazeka/validate-download-with-sha256-hash>)."""
+
+    TEST_FILE = 'test.bson'
+    """Test data file."""
 
     TRAIN_FILE = 'train.bson'
     """Train data file. May be changed to `train_examples.bson` for a quick check."""
@@ -168,11 +168,24 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
             self._categories = pd.read_csv(path.join(self._data_root, self.CATEGORIES_FILE), index_col=0)
 
     def _data_iterator(self, name: str):
+        """
+        Iterate through images.
+
+        You may augment the data here.
+        Tip: use opencv backend (see .util.py) and resize the image to say 64x64.
+
+        TODO: GPU-CPU parallelism
+        """
         self._load_meta()
         for example in bson.decode_file_iter(open(path.join(self._data_root, self.TRAIN_FILE), 'rb')):
             if self._split.loc[example['_id']]['split'] == name:
                 for image in example['imgs']:
-                    yield (skimage.data.imread(io.BytesIO(image['picture'])), example['category_id'])
+                    yield (decode_image(image['picture']), example['category_id'])
+
+    def _predict_iterator(self):
+        for example in bson.decode_file_iter(open(path.join(self._data_root, self.TEST_FILE), 'rb')):
+            for image in example['imgs']:
+                yield (decode_image(image['picture']), example['_id'])
 
     def _stream(self, name: str):
         for batch in gen_batch(self._data_iterator(name), self._batch_size):
@@ -189,7 +202,20 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
         for batch in self._stream('valid'):
             yield batch
 
+    def predict_stream(self):
+        for batch in gen_batch(self._predict_iterator(), self._batch_size):
+            images, ids = zip(*list(batch))
+            yield {'images': images, 'ids': ids}
+
     @property
     def num_classes(self):
         self._load_meta()
         return len(self._categories.index)
+
+    @property
+    def shape(self):
+        return [180, 180, 3]
+
+    @property
+    def data_root(self):
+        return self._data_root

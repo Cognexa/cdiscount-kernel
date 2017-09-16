@@ -34,3 +34,13 @@ hooks:
   - StopAfter:
       epochs: 10
   - cxflow_tensorflow.hooks.WriteTensorBoard
+
+predict:
+  dataset:
+    batch_size: 256
+  model:
+    inputs: [images]
+    outputs: [predictions]
+  hooks:
+    - cdc.CDCPredictionHook
+    - ShowProgress
