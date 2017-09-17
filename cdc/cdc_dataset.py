@@ -3,6 +3,8 @@ import logging
 import random
 import os.path as path
 from itertools import takewhile
+from threading import Thread
+from queue import Queue
 
 import bson
 import cxflow as cx
@@ -167,32 +169,40 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
             self._split = pd.read_csv(path.join(self._data_root, self._split_file), index_col=0)
             self._categories = pd.read_csv(path.join(self._data_root, self.CATEGORIES_FILE), index_col=0)
 
-    def _data_iterator(self, name: str):
+    def _produce_examples(self, name: str):
         """
-        Iterate through images.
+        Iterate through training images and produce (image, class) pairs
 
         You may augment the data here.
         Tip: use opencv backend (see .util.py) and resize the image to say 64x64.
-
-        TODO: GPU-CPU parallelism
         """
         self._load_meta()
         for example in bson.decode_file_iter(open(path.join(self._data_root, self.TRAIN_FILE), 'rb')):
             if self._split.loc[example['_id']]['split'] == name:
                 for image in example['imgs']:
-                    yield (decode_image(image['picture']), example['category_id'])
+                    yield (decode_image(image['picture'])/255, self._categories.loc[example['category_id']]['class'])
 
-    def _predict_iterator(self):
+    def _produce_predict_examples(self):
+        """Iterate through test images and produce (image, _id) pairs"""
         for example in bson.decode_file_iter(open(path.join(self._data_root, self.TEST_FILE), 'rb')):
             for image in example['imgs']:
-                yield (decode_image(image['picture']), example['_id'])
+                yield (decode_image(image['picture'])/255, example['_id'])
+
+    def _enqueue_batches(self, queue, name):
+        for batch in gen_batch(self._produce_examples(name), self._batch_size):
+            images, categories = zip(*list(batch))
+            queue.put({'images': images, 'labels': categories})
+        queue.put(None)
 
     def _stream(self, name: str):
-        for batch in gen_batch(self._data_iterator(name), self._batch_size):
-            images, categories = zip(*list(batch))
-            categories = [self._categories.loc[category]['class'] for category in categories]
-            images = [image/255 for image in images]
-            yield {'images': images, 'labels': categories}
+        queue = Queue(16)
+        Thread(target=self._enqueue_batches, args=(queue, name)).start()
+        while True:
+            batch = queue.get()
+            queue.task_done()
+            if batch is None:
+                break
+            yield batch
 
     def train_stream(self):
         for batch in self._stream('train'):
@@ -203,7 +213,7 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
             yield batch
 
     def predict_stream(self):
-        for batch in gen_batch(self._predict_iterator(), self._batch_size):
+        for batch in gen_batch(self._produce_predict_examples(), self._batch_size):
             images, ids = zip(*list(batch))
             yield {'images': images, 'ids': ids}
 

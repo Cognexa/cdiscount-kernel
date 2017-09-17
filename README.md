@@ -11,9 +11,11 @@ Features:
 - Simple data visualization
 - Train-Valid splitting
 - Low memory footprint data streams
+- GPU-CPU parallelism
 - Base VGG-like convnet
 - Multi-GPU training with a single argument!
 - TensorBoard training tracking
+- Model prediction and submission
 
 ## Quick start
 Install tensorflow and 7z.
@@ -49,6 +51,15 @@ Observe the training with TensorBoard (note: a summary is written only after eac
 tensorboard --logdir=log
 ```
 
+Obtain predictions for submission:
+```
+cxflow predict log/<DIR> log/<DIR> model.restore_model_name=<CHECKPOINT NAME>
+```
+
+With only one checkpoint in the output directory, this simplifies to:
+```
+cxflow predict log/<DIR>
+```
 
 ## About
 This kernel is written in [cxflow-tensorflow](https://github.com/Cognexa/cxflow-tensorflow), a plugin for [cxflow](https://github.com/Cognexa/cxflow) framework. Make sure you check it out!
