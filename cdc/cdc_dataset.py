@@ -3,8 +3,6 @@ import logging
 import random
 import os.path as path
 from itertools import takewhile
-from threading import Thread
-from queue import Queue
 
 import bson
 import cxflow as cx
@@ -188,21 +186,10 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
             for image in example['imgs']:
                 yield (decode_image(image['picture'])/255, example['_id'])
 
-    def _enqueue_batches(self, queue, name):
+    def _stream(self, name: str):
         for batch in gen_batch(self._produce_examples(name), self._batch_size):
             images, categories = zip(*list(batch))
-            queue.put({'images': images, 'labels': categories})
-        queue.put(None)
-
-    def _stream(self, name: str):
-        queue = Queue(16)
-        Thread(target=self._enqueue_batches, args=(queue, name)).start()
-        while True:
-            batch = queue.get()
-            queue.task_done()
-            if batch is None:
-                break
-            yield batch
+            yield {'images': images, 'labels': categories}
 
     def train_stream(self):
         for batch in self._stream('train'):
@@ -229,3 +216,8 @@ class CDCNaiveDataset(cx.datasets.BaseDataset):
     @property
     def data_root(self):
         return self._data_root
+
+    @property
+    def num_batches(self):
+        return {'train': round(12371293*(1-self._valid_percent)/self._batch_size),
+                'valid': round(12371293*self._valid_percent/self._batch_size)}

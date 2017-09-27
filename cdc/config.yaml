@@ -19,8 +19,9 @@ model:
   outputs: [loss, accuracy]
 
 main_loop:
-  extra_streams: [valid]
   skip_zeroth_epoch: True
+  buffer: 4
+  fixed_epoch_size: 5000
 
 hooks:
   - ShowProgress
@@ -28,11 +29,9 @@ hooks:
       variables: [loss, accuracy]
   - LogVariables
   - LogProfile
-  - SaveEvery
-  - SaveBest
   - CatchSigint
   - StopAfter:
-      epochs: 10
+      epochs: 1000
   - cxflow_tensorflow.hooks.WriteTensorBoard
 
 predict:
