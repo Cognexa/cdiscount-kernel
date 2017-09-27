@@ -1,0 +1,50 @@
+dataset:
+  class: cdc.FastDataset
+  data_root: data
+  size: 128
+  batch_size: 256
+
+model:
+  name: XCeptionNet
+  class: cdc.xception.XCeptionNet
+
+  optimizer:
+    class: AdamOptimizer
+    learning_rate: 0.0001
+  session_config: {allow_soft_placement: true, gpu_options: {allow_growth: true}}
+
+  inputs: [images, labels]
+  outputs: [loss, accuracy]
+
+  middle_flow_repeats: 4
+  dropout: 0.5
+  weight_decay: 0.00001
+
+  # finetune: path/to/checkpooint  # for fine-tuning from already trained net
+
+main_loop:
+  buffer: 4
+  fixed_epoch_size: 20000
+  skip_zeroth_epoch: True
+  extra_streams: [valid]
+
+hooks:
+  - ShowProgress
+  - ComputeStats:
+      variables: [loss, accuracy]
+  - LogVariables
+  - LogProfile
+  - SaveBest
+  - StopAfter:
+      epochs: 10000
+  - cxflow_tensorflow.hooks.WriteTensorBoard
+
+predict:
+  dataset:
+    batch_size: 512
+  model:
+    inputs: [images]
+    outputs: [predictions]
+  hooks:
+    - cdc.CDCPredictionHook
+    - ShowProgress
