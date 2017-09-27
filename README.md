@@ -61,6 +61,33 @@ With only one checkpoint in the output directory, this simplifies to:
 cxflow predict log/<DIR>
 ```
 
+## UPDATE [0.65]
+Main features:
+- XCeption net (https://arxiv.org/abs/1610.02357)
+- Fast random access
+
+Resize the data to `dataset.size` with
+```
+cxflow dataset resize cdc/xception.yaml
+```
+
+(this may take a few hours)
+
+Run the training with
+```
+cxflow train cdc/xception.yaml
+```
+
+Training procedure that reached 0.65:
+- Train with original size, LR 0.0001, 4 middle flow repeats until stalled
+- Fine-tune with 128x128, LR 0.0001, 0.5 dropout, 0.00001 weight decay until stalled
+- Fine-tune as above but with LR 0.00001 (10x smaller)
+
+Tips:
+- Use small images right away
+- The final GlobalAveragePooling may be a bottleneck
+- Net does not overfit so far, no augmentations needed
+
 ## About
 This kernel is written in [cxflow-tensorflow](https://github.com/Cognexa/cxflow-tensorflow), a plugin for [cxflow](https://github.com/Cognexa/cxflow) framework. Make sure you check it out!
 
