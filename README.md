@@ -61,17 +61,17 @@ With only one checkpoint in the output directory, this simplifies to:
 cxflow predict log/<DIR>
 ```
 
-## UPDATE [0.65]
+## UPDATE [LB 0.65]
+**important:** update **cxflow** and **cxflow-tensorflow** with `pip3 install cxflow cxflow-tensorflow --user --upgrade`
+
 Main features:
 - XCeption net (https://arxiv.org/abs/1610.02357)
-- Fast random access
+- Fast random data access
 
-Resize the data to `dataset.size` with
+Resize the data to `dataset.size` with (this may take a few hours)
 ```
 cxflow dataset resize cdc/xception.yaml
 ```
-
-(this may take a few hours)
 
 Run the training with
 ```
