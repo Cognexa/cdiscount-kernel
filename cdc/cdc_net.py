@@ -45,5 +45,5 @@ class CDCNaiveNet(cxtf.BaseModel):
         # outputs
         loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
         tf.identity(loss, name='loss')
-        predictions = tf.argmax(logits, 1, name='predictions')
-        tf.reduce_mean(tf.cast(tf.equal(predictions, labels), tf.float32, name='accuracy'))
+        tf.nn.softmax(logits, 1, name='predictions')
+        tf.reduce_mean(tf.cast(tf.equal(tf.argmax(logits, 1), labels), tf.float32, name='accuracy'))
