@@ -71,6 +71,7 @@ Main features:
 Resize the data to `dataset.size` with (this may take a few hours)
 ```
 cxflow dataset resize cdc/xception.yaml
+cxflow dataset split cdc/xception.yaml
 ```
 
 Run the training with
