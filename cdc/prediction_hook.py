@@ -16,10 +16,14 @@ class CDCPredictionHook(cx.hooks.AccumulateVariables):
         super().__init__(**kwargs, variables=['ids', 'predictions'])
         self._class_to_category = pd.read_csv(path.join(dataset.data_root, dataset.CATEGORIES_FILE), index_col=1)
 
+    def after_batch(self, stream_name, batch_data):
+        batch_data['predictions'] = np.argmax(batch_data['predictions'], -1)
+        super().after_batch(stream_name, batch_data)
+
     def after_epoch(self, epoch_id, epoch_data):
         # map integer classes back to cdiscount categories
         ids = self._accumulator['predict']['ids']
-        predictions = [self._class_to_category.loc[np.argmax(prediction)]['category_id']
+        predictions = [self._class_to_category.loc[prediction]['category_id']
                        for prediction in self._accumulator['predict']['predictions']]
 
         # major voting
