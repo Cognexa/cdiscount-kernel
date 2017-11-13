@@ -22,7 +22,7 @@ class XCeptionNet(cxtf.BaseModel):
                       weight_decay: float=0.,
                       **kwargs) -> None:
         """
-        Craete XCeption model.
+        Create XCeption model.
 
         :param middle_flow_repeats: number of middle flow block repeats
         :param dropout: dropout rate of the extracted features
