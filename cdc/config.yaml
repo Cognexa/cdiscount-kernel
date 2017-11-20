@@ -29,7 +29,6 @@ hooks:
       variables: [loss, accuracy]
   - LogVariables
   - LogProfile
-  - CatchSigint
   - StopAfter:
       epochs: 1000
   - cxflow_tensorflow.hooks.WriteTensorBoard
